@@ -5,7 +5,12 @@ import { useState, useEffect } from "react";
 const { containerBootstrap } = require('@nlpjs/core');
 const { Nlp } = require('@nlpjs/nlp');
 const { LangEn } = require('@nlpjs/lang-en-min');
-var obj = require('./corpus-en.json');
+const { LangEs } = require('@nlpjs/lang-es');
+
+console.log = function() {}
+
+var enCorpus = require('./corpus-en.json');
+var esCorpus = require('./corpus-es.json');
 
 let questions = [];
 let answers = [];
@@ -15,15 +20,48 @@ async function nlp (question) {
   
   container.use(Nlp);
   container.use(LangEn);
+  container.use(LangEs);
+
   const nlp = container.get('nlp');
+  nlp.settings.log = false;
   nlp.settings.autoSave = false;
 
-  await nlp.addCorpus(obj);
+  await nlp.addCorpus(enCorpus);
+  await nlp.addCorpus(esCorpus);
   await nlp.train();
   
-  const response = await nlp.process('en', question);
+  const language = await nlp.guessLanguage(question);
+
+  const response = await nlp.process(language, question);
   return response;
 };
+
+async function trainNlp (language, intent, utterances, answers) {
+  if (language === "es") {
+    enCorpus.data.push(
+      {
+        "intent": intent,
+        "utterances": utterances,
+        "answers": answers,
+      }
+    )
+  } else {
+    esCorpus.data.push(
+      {
+        "intent": intent,
+        "utterances": utterances,
+        "answers": answers,
+      }
+    )
+  }
+}
+
+trainNlp(
+  "en", 
+  "agent.work", 
+  ["How can i change the page"], 
+  ["By clicking on the top"]
+)
 
 function App() {
   const [inputValue, setInputValue] = useState('');
@@ -45,10 +83,12 @@ function App() {
 
         <form onSubmit={async (event) => {
             event.preventDefault();
-            questions.push(`Question: ${inputValue}\n`);
-            const answer = await nlp(inputValue);
-            answers.push(`Answer: ${answer.answer}`);
-            setSubmitForm(true);
+            if (inputValue.length > 0) {
+              questions.push(`Question: ${inputValue}\n`);
+              const answer = await nlp(inputValue);
+              answers.push(`Answer: ${answer.answer}`);
+              setSubmitForm(true);
+            }
           }}>
           <input
             type="text"
