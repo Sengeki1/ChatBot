@@ -15,25 +15,21 @@ var esCorpus = require('./corpus-es.json');
 let questions = [];
 let answers = [];
 
-async function nlp (question) {
+let nlp_;
+async function nlp () {
   const container = await containerBootstrap();
   
   container.use(Nlp);
   container.use(LangEn);
   container.use(LangEs);
 
-  const nlp = container.get('nlp');
-  nlp.settings.log = false;
-  nlp.settings.autoSave = false;
+  nlp_ = container.get('nlp');
+  nlp_.settings.log = false;
+  nlp_.settings.autoSave = false;
 
-  await nlp.addCorpus(enCorpus);
-  await nlp.addCorpus(esCorpus);
-  await nlp.train();
-  
-  const language = await nlp.guessLanguage(question);
-
-  const response = await nlp.process(language, question);
-  return response;
+  await nlp_.addCorpus(enCorpus);
+  await nlp_.addCorpus(esCorpus);
+  await nlp_.train();
 };
 
 async function trainNlp (language, intent, utterances, answers) {
@@ -54,13 +50,15 @@ async function trainNlp (language, intent, utterances, answers) {
       }
     )
   }
+
+  nlp()
 }
 
 trainNlp(
   "en", 
   "agent.work", 
   ["How can i change the page"], 
-  ["By clicking on the top"]
+  ["By clicking on the top", "Dont know"]
 )
 
 function App() {
@@ -85,7 +83,10 @@ function App() {
             event.preventDefault();
             if (inputValue.length > 0) {
               questions.push(`Question: ${inputValue}\n`);
-              const answer = await nlp(inputValue);
+
+              const language = await nlp_.guessLanguage(inputValue);
+              const answer = await nlp_.process(language, inputValue);
+
               answers.push(`Answer: ${answer.answer}`);
               setSubmitForm(true);
             }
