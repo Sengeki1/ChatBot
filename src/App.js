@@ -1,6 +1,13 @@
-import './App.css';
-import Chat from './Components/Chat';
 import { useState, useEffect } from "react";
+
+import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import {
+  MainContainer,
+  ChatContainer,
+  MessageList,
+  Message,
+  MessageInput,
+} from "@adelespinasse/chat-ui-kit-react";
 
 const { containerBootstrap } = require('@nlpjs/core');
 const { Nlp } = require('@nlpjs/nlp');
@@ -11,9 +18,6 @@ console.log = function() {}
 
 var enCorpus = require('./corpus-en.json');
 var esCorpus = require('./corpus-es.json');
-
-let questions = [];
-let answers = [];
 
 let nlp_;
 async function nlp () {
@@ -63,48 +67,52 @@ trainNlp(
 
 function App() {
   const [inputValue, setInputValue] = useState('');
-  const [submitForm, setSubmitForm] = useState(false);
+  const [messages, setMessages] = useState([]);
 
 
-  useEffect(() => {
-    if (submitForm) {
-      setInputValue("");
-      setSubmitForm(false);
+  useEffect( () => {
+    const run = async () => {
+      if (inputValue.length > 0) {
+        const language = await nlp_.guessLanguage(inputValue);
+        const answer = await nlp_.process(language, inputValue);
+        setMessages(prev => [
+          ...prev,
+          <Message 
+            model={{
+              message: inputValue,
+              sentTime: "just now",
+              sender: "You"
+            }}/>,
+          <Message 
+          model={{
+            message: answer.answer,
+            sentTime: "just now",
+            sender: "Bot",
+            direction: "right"
+          }}/>
+        ])
+
+        setInputValue("");
+      }
     }
-  }, [inputValue, submitForm]);
+
+    run();
+  });
 
   return (
-    <div className="App">
-        <Chat questions={questions} answers={answers}/>
-
-      <header className="App-header">
-
-        <form onSubmit={async (event) => {
-            event.preventDefault();
-            if (inputValue.length > 0) {
-              questions.push(`Question: ${inputValue}\n`);
-
-              const language = await nlp_.guessLanguage(inputValue);
-              const answer = await nlp_.process(language, inputValue);
-
-              answers.push(`Answer: ${answer.answer}`);
-              setSubmitForm(true);
-            }
-          }}>
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Enter something"
-          />
-          <br/>
-          <button type="submit">Submit</button>
-        </form>
-
-      </header>
-      
+    <div style={{ position: "relative", height: "500px", width: "300px" }}>
+      <MainContainer>
+        <ChatContainer>
+          <MessageList>
+            {messages}
+          </MessageList>
+          <MessageInput 
+            placeholder="Type message here" 
+            attachButton="false" 
+            onSend={(value) => {
+              setInputValue(value);
+            }}/>
+        </ChatContainer>
+      </MainContainer>
     </div>
-  );
-}
-
-export default App;
+)};
