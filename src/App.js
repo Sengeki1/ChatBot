@@ -10,16 +10,15 @@ import {
   MessageInput,
   TypingIndicator
 } from "@adelespinasse/chat-ui-kit-react";
+import { translate } from '@vitalets/google-translate-api';
 
 const { containerBootstrap } = require('@nlpjs/core');
 const { Nlp } = require('@nlpjs/nlp');
 const { LangEn } = require('@nlpjs/lang-en-min');
-const { LangEs } = require('@nlpjs/lang-es');
 
 console.log = function() {}
 
 var enCorpus = require('./corpus-en.json');
-var esCorpus = require('./corpus-es.json');
 
 let nlp_;
 async function nlp () {
@@ -27,35 +26,23 @@ async function nlp () {
   
   container.use(Nlp);
   container.use(LangEn);
-  container.use(LangEs);
 
   nlp_ = container.get('nlp');
   nlp_.settings.log = false;
   nlp_.settings.autoSave = false;
 
   await nlp_.addCorpus(enCorpus);
-  await nlp_.addCorpus(esCorpus);
   await nlp_.train();
 };
 
-async function trainNlp (language, intent, utterances, answers) {
-  if (language === "es") {
-    enCorpus.data.push(
-      {
-        "intent": intent,
-        "utterances": utterances,
-        "answers": answers,
-      }
-    )
-  } else {
-    esCorpus.data.push(
-      {
-        "intent": intent,
-        "utterances": utterances,
-        "answers": answers,
-      }
-    )
-  }
+async function trainNlp (intent, utterances, answers) {
+  enCorpus.data.push(
+    {
+      "intent": intent,
+      "utterances": utterances,
+      "answers": answers,
+    }
+  )
 
   nlp()
 }
@@ -81,8 +68,8 @@ function App() {
   useEffect( () => {
     const run = async () => {
       if (inputValue.length > 0) {
-        const language = await nlp_.guessLanguage(inputValue);
-        const answer = await nlp_.process(language, inputValue);
+        const locale = await nlp_.guessLanguage(inputValue);
+        const answer = await translate(await nlp_.process(locale, await translate(inputValue, {to: locale})));
         setMessages(prev => [
           ...prev,
           <Message 
