@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@adelespinasse/chat-ui-kit-react": "^2.0.4",
+    "@chatscope/chat-ui-kit-styles": "^1.4.0",
     "@nlpjs/core": "^5.0.0-alpha.5",
     "@nlpjs/lang-en-min": "^5.0.0-alpha.5",
     "@nlpjs/lang-es": "^5.0.0-alpha.5",
@@ -20,7 +22,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts --watch start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
