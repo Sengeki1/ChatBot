@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import "./App.css"
 import {
   MainContainer,
   ChatContainer,
@@ -70,6 +71,8 @@ function App() {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
   const [typingIndicator, setTypingIndicator] = useState(false);
+  const [toggledChat, setToggledChat] = useState(false);
+  const [animation, setAnimation] = useState(false);
 
   async function sleep(ms) {
     return await new Promise((resolve) => setTimeout(resolve, ms));
@@ -111,21 +114,81 @@ function App() {
   }, [inputValue, typingIndicator]);
   
   return (
-    <div style={{ position: "relative", height: "600px", width: "400px" }}>
-      <MainContainer>
-        <ChatContainer>
-          <MessageList typingIndicator={typingIndicator && <TypingIndicator content="..." />}>
-            {messages}
-          </MessageList>
-          <MessageInput 
-            placeholder="Type message here" 
-            attachButton="false" 
-            onSend={(value) => {
-              setInputValue(value);
-            }}
-            />
-        </ChatContainer>
-      </MainContainer>
+    <div>
+      {
+      animation ? 
+      <img 
+        className="scale-animation"
+        style=
+          {{
+            position: "absolute",
+            bottom: 30,
+            right: 30,
+            width: "50px",
+            height: "50px",
+        }}
+        alt="chat"
+        src="https://img.icons8.com/ios-filled/50/339AF0/chat.png" 
+        onClick={() => {
+          if (toggledChat) setToggledChat(false);
+          else {
+            setToggledChat(true);
+            setAnimation(false)
+          }
+        }}
+        onMouseLeave={() => {
+          setAnimation(false)
+        }}
+      />
+      :
+      <img 
+        src="https://img.icons8.com/ios-filled/50/339AF0/chat.png" 
+        style=
+          {{
+            position: "absolute",
+            bottom: 30,
+            right: 30,
+            width: "50px",
+            height: "50px",
+        }}
+        alt="chat" 
+        onClick={() => {
+          if (toggledChat) setToggledChat(false);
+          else setToggledChat(true);
+        }}
+        onMouseEnter={() => {
+          if (!toggledChat) {
+            setAnimation(true);
+          }
+        }}     
+        />
+      }
+      <div 
+        className="chat-box"
+        style={{ 
+          position: "absolute", 
+          bottom: 40,
+          right: 120,
+          height: "600px", 
+          width: "400px",
+        }}>
+        { toggledChat ?
+          <MainContainer>
+            <ChatContainer>
+              <MessageList typingIndicator={typingIndicator && <TypingIndicator content="..." />}>
+                {messages}
+              </MessageList>
+              <MessageInput 
+                placeholder="Type message here" 
+                attachButton="false" 
+                onSend={(value) => {
+                  setInputValue(value);
+                }}
+                />
+            </ChatContainer>
+          </MainContainer> : <div></div>
+        }
+      </div>
     </div>
 )};
 
