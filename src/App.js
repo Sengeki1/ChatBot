@@ -7,6 +7,7 @@ import {
   MessageList,
   Message,
   MessageInput,
+  TypingIndicator
 } from "@adelespinasse/chat-ui-kit-react";
 
 const { containerBootstrap } = require('@nlpjs/core');
@@ -68,7 +69,11 @@ trainNlp(
 function App() {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
+  const [typingIndicator, setTypingIndicator] = useState(false);
 
+  async function sleep(ms) {
+    return await new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
   useEffect( () => {
     const run = async () => {
@@ -83,27 +88,33 @@ function App() {
               sentTime: "just now",
               sender: "You"
             }}/>,
-          <Message 
-          model={{
-            message: answer.answer,
-            sentTime: "just now",
-            sender: "Bot",
-            direction: "right"
+          ])
+        setInputValue("");
+
+        setTypingIndicator(true);
+        await sleep(2000);
+        setMessages(prev => [
+          ...prev,
+          <Message
+            model={{
+              message: answer.answer,
+              sentTime: "just now",
+              sender: "Bot",
+              direction: "right"
           }}/>
         ])
-
-        setInputValue("");
+        setTypingIndicator(false);
       }
     }
 
     run();
-  });
-
+  }, [inputValue, typingIndicator]);
+  
   return (
-    <div style={{ position: "relative", height: "500px", width: "300px" }}>
+    <div style={{ position: "relative", height: "600px", width: "400px" }}>
       <MainContainer>
         <ChatContainer>
-          <MessageList>
+          <MessageList typingIndicator={typingIndicator && <TypingIndicator content="..." />}>
             {messages}
           </MessageList>
           <MessageInput 
@@ -111,8 +122,11 @@ function App() {
             attachButton="false" 
             onSend={(value) => {
               setInputValue(value);
-            }}/>
+            }}
+            />
         </ChatContainer>
       </MainContainer>
     </div>
 )};
+
+export default App;
