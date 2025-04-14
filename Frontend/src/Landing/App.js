@@ -158,16 +158,17 @@ function App() {
 
         // COMUNICATION WITH BACKEND
         if (locale !== "en") {
+          setTypingIndicator(true);
           const translation = await translateEN(inputValue, locale);
           const response = await nlp_.process(translation)
           answer = await translate(response.answer, locale);
         } else {
           answer = await nlp_.process(inputValue);
           answer = answer.answer;
+          setTypingIndicator(true);
+          await sleep(2000);
         }
         
-        setTypingIndicator(true);
-        await sleep(2000);
         setMessages(prev => [
           ...prev,
           <Message

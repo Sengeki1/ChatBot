@@ -47,9 +47,12 @@ app.post('/guessLanguage', async (req, res) => {
 
     try {
         const data = detect(textData);
+        console.log(data);
         data?.forEach((value) => {
             if (value?.lang === 'en' || value?.lang === 'es' || value?.lang === 'pt') {
                 res.status(200).json({ text: value?.lang })
+            } else {
+                res.status(200).json({ text: 'en'})
             }
         })
     } catch (err) {
