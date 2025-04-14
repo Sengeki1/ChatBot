@@ -15,6 +15,7 @@ A chatbot project built using **Node.js**, **NLP.js** for Natural Language Proce
 - Natural language understanding with [NLP.js](https://github.com/axa-group/nlp.js)
 - Real-time chatbot interface using [@chatscope/chat-ui-kit-styles](https://www.npmjs.com/package/@chatscope/chat-ui-kit-styles)
 - Easy to customize and extend intents, responses, and logic
+- Automatic translation
 
 ---
 
