@@ -33,7 +33,7 @@ A chatbot project built using **Node.js**, **NLP.js** for Natural Language Proce
     npm install
     ```
 
-3. **Start the chatbot (Backend & Frontend) **
+3. **Start the chatbot (Backend & Frontend)**
 
     ```bash
     npm start
