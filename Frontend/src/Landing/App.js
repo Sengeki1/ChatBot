@@ -10,15 +10,13 @@ import {
   MessageInput,
   TypingIndicator
 } from "@adelespinasse/chat-ui-kit-react";
-import { translate } from '@vitalets/google-translate-api';
 
 const { containerBootstrap } = require('@nlpjs/core');
 const { Nlp } = require('@nlpjs/nlp');
 const { LangEn } = require('@nlpjs/lang-en-min');
+var enCorpus = require('../utils/corpus-en.json');
 
-console.log = function() {}
-
-var enCorpus = require('./corpus-en.json');
+//console.log = function() {}
 
 let nlp_;
 async function nlp () {
@@ -65,29 +63,116 @@ function App() {
     return await new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  async function translate(message, locale) {
+    return new Promise(async (resolve, reject) => {
+      await fetch("http://localhost:3001/translate", {
+        method: "POST",
+        headers: {
+          'Content-Type': "application/json"
+        },
+        body: JSON.stringify(
+          {
+            text: message,
+            locale: locale
+          }
+        )
+      }) 
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.text);
+        resolve(data.text);
+      })
+      .catch(err => {
+        reject(err);
+      })
+
+    })
+  }
+
+  async function translateEN(message, locale) {
+    return new Promise(async (resolve, reject) => {
+      await fetch("http://localhost:3001/translateEN", {
+        method: "POST",
+        headers: {
+          'Content-Type': "application/json"
+        },
+        body: JSON.stringify(
+          {
+            text: message,
+            locale: locale
+          }
+        )
+      }) 
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.text);
+        resolve(data.text);
+      })
+      .catch(err => {
+        reject(err);
+      })
+    })
+  }
+
+  async function guessLanguage(message) {
+    return new Promise(async (resolve, reject) => {
+      await fetch("http://localhost:3001/guessLanguage", {
+        method: "POST",
+        headers: {
+          'Content-Type': "application/json"
+        },
+        body: JSON.stringify(
+          {
+            text: message,
+          }
+        )
+      }) 
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.text);
+        resolve(data.text);
+      })
+      .catch(err => {
+        reject(err);
+      })
+    })
+  }
+
   useEffect( () => {
     const run = async () => {
       if (inputValue.length > 0) {
-        const locale = await nlp_.guessLanguage(inputValue);
-        const answer = await translate(await nlp_.process(locale, await translate(inputValue, {to: locale})));
+        const locale = await guessLanguage(inputValue);
+        console.log(locale);
+        let answer;
+
         setMessages(prev => [
           ...prev,
           <Message 
-            model={{
-              message: inputValue,
-              sentTime: "just now",
-              sender: "You"
-            }}/>,
-          ])
+          model={{
+            message: inputValue,
+            sentTime: "just now",
+            sender: "You"
+          }}/>,
+        ])
         setInputValue("");
 
+        // COMUNICATION WITH BACKEND
+        if (locale !== "en") {
+          const translation = await translateEN(inputValue, locale);
+          const response = await nlp_.process(translation)
+          answer = await translate(response.answer, locale);
+        } else {
+          answer = await nlp_.process(inputValue);
+          answer = answer.answer;
+        }
+        
         setTypingIndicator(true);
         await sleep(2000);
         setMessages(prev => [
           ...prev,
           <Message
             model={{
-              message: answer.answer,
+              message: answer,
               sentTime: "just now",
               sender: "Bot",
               direction: "right"
