@@ -24,8 +24,8 @@ A chatbot project built using **Node.js**, **NLP.js** for Natural Language Proce
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/nlp-chatbot.git
-   cd nlp-chatbot
+   git clone https://github.com/Sengeki1/ChatBot.git
+   cd ChatBot
 
 2. **Install Dependencies**
 
@@ -33,7 +33,7 @@ A chatbot project built using **Node.js**, **NLP.js** for Natural Language Proce
     npm install
     ```
 
-3. **Start the chatbot**
+3. **Start the chatbot (Backend & Frontend) **
 
     ```bash
     npm start
