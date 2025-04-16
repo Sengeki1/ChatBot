@@ -2,9 +2,12 @@ import express from 'express'
 import cors from 'cors';
 import fetch from 'node-fetch';
 import { detect } from 'langdetect';
+import env from 'dotenv'
+
+env.config();
 
 const app = express();
-const PORT = 3001;
+const PORT = 3003;
 
 app.use(cors()); // allow all origins
 app.use(express.json()); // parse JSON bodies
@@ -15,7 +18,7 @@ app.post('/translate', async (req, res) => {
 
     console.log(req.body);
     try {
-        const response = await fetch(`https://lingva.ml/api/v1/en/${locale}/${encodeURIComponent(textData)}`);
+        const response = await fetch(`${process.env.TRANSLATIONURL}en/${locale}/${encodeURIComponent(textData)}`);
         const data = await response.json() as {translation: string};
         console.log(data);
         res.status(200).json({ text: data.translation });
@@ -31,7 +34,7 @@ app.post('/translateEN', async (req, res) => {
     const locale = req.body.locale;
 
     try {
-        const response = await fetch(`https://lingva.ml/api/v1/${locale}/en/${encodeURIComponent(textData)}`);
+        const response = await fetch(`${process.env.TRANSLATIONURL}${locale}/en/${encodeURIComponent(textData)}`);
         const data = await response.json() as {translation: string};
         console.log(data);
         res.status(200).json({ text: data.translation });
@@ -62,5 +65,5 @@ app.post('/guessLanguage', async (req, res) => {
 
 
 app.listen(PORT, "localhost", () => {
-    console.log("Listening on port 3001");
+    console.log("Listening on port 3003");
 });

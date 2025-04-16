@@ -65,7 +65,7 @@ function App() {
 
   async function translate(message, locale) {
     return new Promise(async (resolve, reject) => {
-      await fetch("http://localhost:3001/translate", {
+      await fetch("http://localhost:3003/translate", {
         method: "POST",
         headers: {
           'Content-Type': "application/json"
@@ -91,7 +91,7 @@ function App() {
 
   async function translateEN(message, locale) {
     return new Promise(async (resolve, reject) => {
-      await fetch("http://localhost:3001/translateEN", {
+      await fetch("http://localhost:3003/translateEN", {
         method: "POST",
         headers: {
           'Content-Type': "application/json"
@@ -116,7 +116,7 @@ function App() {
 
   async function guessLanguage(message) {
     return new Promise(async (resolve, reject) => {
-      await fetch("http://localhost:3001/guessLanguage", {
+      await fetch("http://localhost:3003/guessLanguage", {
         method: "POST",
         headers: {
           'Content-Type': "application/json"
