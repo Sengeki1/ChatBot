@@ -1,6 +1,6 @@
 # ChatBot Using Natural Language Processor
 
-A chatbot project built using **Node.js**, **NLP.js** for Natural Language Processing, and **@chatscope/chat-ui-kit-styles** for a sleek and modern chat interface.
+A chatbot project built using **Node.js**, **NLP.js** for Natural Language Processing, and **React** for a sleek and modern chat interface.
 
 <p align="center">
   <kbd>
