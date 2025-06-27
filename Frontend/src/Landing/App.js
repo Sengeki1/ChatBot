@@ -43,13 +43,6 @@ async function trainNlp (intent, utterances, answers) {
   nlp()
 }
 
-trainNlp(
-  "en", 
-  "agent.work", 
-  ["How can i change the page"], 
-  ["By clicking on the top", "Dont know"]
-)
-
 function App() {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
