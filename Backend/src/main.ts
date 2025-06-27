@@ -3,6 +3,7 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import { detect } from 'langdetect';
 import env from 'dotenv'
+import { saveData } from './data'
 
 env.config();
 
@@ -16,11 +17,16 @@ app.post('/translate', async (req, res) => {
     const textData = req.body.text;
     const locale = req.body.locale;
 
-    console.log(req.body);
     try {
         const response = await fetch(`${process.env.TRANSLATIONURL}en/${locale}/${encodeURIComponent(textData)}`);
         const data = await response.json() as {translation: string};
-        console.log(data);
+        
+        await saveData({
+            "intent": "train",
+            "utterances": [textData],
+            "answers": [""]
+        });
+        
         res.status(200).json({ text: data.translation });
     } catch (err) {
         if (err.name === 'TooManyRequestsError') {
@@ -36,7 +42,13 @@ app.post('/translateEN', async (req, res) => {
     try {
         const response = await fetch(`${process.env.TRANSLATIONURL}${locale}/en/${encodeURIComponent(textData)}`);
         const data = await response.json() as {translation: string};
-        console.log(data);
+        
+        await saveData({
+            "intent": "",
+            "utterances": [textData],
+            "answers": [""]
+        });
+
         res.status(200).json({ text: data.translation });
     } catch (err) {
         if (err.name === 'TooManyRequestsError') {
@@ -51,13 +63,15 @@ app.post('/guessLanguage', async (req, res) => {
     try {
         const data = detect(textData);
         console.log(data);
-        data?.forEach((value) => {
-            if (value?.lang === 'en' || value?.lang === 'es' || value?.lang === 'pt') {
-                res.status(200).json({ text: value?.lang })
-            } else {
-                res.status(200).json({ text: 'en'})
-            }
-        })
+        const supportedLang = data?.find(value =>
+            value.lang === 'en' || value.lang === 'es' || value.lang === 'pt'
+        );
+
+        if (supportedLang) {
+            return res.status(200).json({ text: supportedLang.lang });
+        } else {
+            return res.status(200).json({ text: 'en' }); // fallback
+        }   
     } catch (err) {
         console.log(err);
     }

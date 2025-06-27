@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "intent": "train",
+      "utterances": [
+        "How are you",
+        "Have you eaten today?"
+      ],
+      "answers": [
+        ""
+      ]
+    }
+  ]
+}
