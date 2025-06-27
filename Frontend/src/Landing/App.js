@@ -16,8 +16,6 @@ const { Nlp } = require('@nlpjs/nlp');
 const { LangEn } = require('@nlpjs/lang-en-min');
 var enCorpus = require('../utils/corpus-en.json');
 
-//console.log = function() {}
-
 let nlp_;
 async function nlp () {
   const container = await containerBootstrap();
@@ -87,6 +85,20 @@ function App() {
       })
 
     })
+  }
+
+  async function train(message) {
+    await fetch("http://localhost:3003/train", {
+      method: "POST",
+      headers: {
+        'Content-Type': "application/json"
+      },
+      body: JSON.stringify(
+        {
+          text: message,
+        }
+      )
+    }) 
   }
 
   async function translateEN(message, locale) {
@@ -160,9 +172,11 @@ function App() {
         if (locale !== "en") {
           setTypingIndicator(true);
           const translation = await translateEN(inputValue, locale);
+          await train(translation)
           const response = await nlp_.process(translation)
           answer = await translate(response.answer, locale);
         } else {
+          await train(inputValue)
           answer = await nlp_.process(inputValue);
           answer = answer.answer;
           setTypingIndicator(true);

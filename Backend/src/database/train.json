@@ -4,7 +4,10 @@
       "intent": "train",
       "utterances": [
         "How are you",
-        "Have you eaten today?"
+        "Doing good?",
+        "Hello",
+        "Nice to know that",
+        "Have you ever thought of dieing?"
       ],
       "answers": [
         ""

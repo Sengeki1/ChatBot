@@ -1,46 +1,43 @@
-import fs from 'fs'
+import * as fs from 'fs/promises';
 
 type TrainingEntry = {
-  intent: string;
-  utterances: string[];
-  answers: string[];
+    intent: string;
+    utterances: string[];
+    answers: string[];
 };
 
-export const saveData = (newEntry: TrainingEntry) => {
-    fs.readFile('src/train.json', 'utf-8', (error, data) => {
-        let jsonData: TrainingEntry[] = []
-        console.log(data)
-        if (!error && data) {
-            try {
-                jsonData = JSON.parse(data)
-            } catch (err) {
-                console.log(err)
+type JsonData = {
+    data: TrainingEntry[];
+};
+
+const FILE_PATH = 'src/database/train.json';
+
+export async function saveData(newEntry: TrainingEntry) {
+    try {
+        const fileContent = await fs.readFile(FILE_PATH, 'utf-8');
+        console.log(fileContent)
+        const jsonData: JsonData = JSON.parse(fileContent);
+
+        const index = jsonData.data.findIndex(entry => entry.intent === newEntry.intent);
+
+        if (index !== -1) {
+            newEntry.utterances.forEach(u => {
+            if (!jsonData.data[index].utterances.includes(u)) {
+                jsonData.data[index].utterances.push(u);
             }
+        });
         } else {
-            console.log(error)
+            jsonData.data.push(newEntry);
         }
 
-        const index = jsonData['data'].findIndex(entry => entry.intent === newEntry.intent);
-        if (index !== -1) {
-                newEntry.utterances.forEach(u => {
-                    if (!jsonData['data'][index].utterances.includes(u)) {
-                        jsonData['data'][index].utterances.push(u);
-                    }
-                });
+        await fs.writeFile(FILE_PATH, JSON.stringify(jsonData, null, 2));
+    } catch (err: any) {
+        if (err.code === 'ENOENT') {
+            const initialData: JsonData = { data: [newEntry] };
+            await fs.writeFile(FILE_PATH, JSON.stringify(initialData, null, 2));
         } else {
-            jsonData['data'].push(newEntry);
-        }  
-
-        fs.writeFile('src/train.json', JSON.stringify(jsonData, null, 2), (errorWrite) => {
-            if (errorWrite) {
-                console.log(errorWrite);
-            }
-        })
-    })
+            console.error('Error in saveData:', err);
+            throw err; 
+        }
+    }
 }
-
-saveData({
-    "intent": "train",
-    "utterances": ["Have you eaten today?"],
-    "answers": [""]
-});

@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors';
 import fetch from 'node-fetch';
 import { detect } from 'langdetect';
-import env from 'dotenv'
+import * as env from 'dotenv';
 import { saveData } from './data'
 
 env.config();
@@ -14,6 +14,7 @@ app.use(cors()); // allow all origins
 app.use(express.json()); // parse JSON bodies
 
 app.post('/translate', async (req, res) => {
+    console.log('Request received');
     const textData = req.body.text;
     const locale = req.body.locale;
 
@@ -21,39 +22,38 @@ app.post('/translate', async (req, res) => {
         const response = await fetch(`${process.env.TRANSLATIONURL}en/${locale}/${encodeURIComponent(textData)}`);
         const data = await response.json() as {translation: string};
         
-        await saveData({
-            "intent": "train",
-            "utterances": [textData],
-            "answers": [""]
-        });
-        
         res.status(200).json({ text: data.translation });
-    } catch (err) {
-        if (err.name === 'TooManyRequestsError') {
-            console.log("retry with another proxy agent");
+    } catch (err: unknown) {
+        if (typeof err === 'object' && err !== null && 'name' in err) {
+            if ((err as any).name === 'TooManyRequestsError') {
+                console.log("retry with another proxy agent");
+            }
+        } else {
+            console.log(err);
         }
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 app.post('/translateEN', async (req, res) => {
+    console.log('Request received');
     const textData = req.body.text;
     const locale = req.body.locale;
 
     try {
         const response = await fetch(`${process.env.TRANSLATIONURL}${locale}/en/${encodeURIComponent(textData)}`);
         const data = await response.json() as {translation: string};
-        
-        await saveData({
-            "intent": "",
-            "utterances": [textData],
-            "answers": [""]
-        });
 
         res.status(200).json({ text: data.translation });
-    } catch (err) {
-        if (err.name === 'TooManyRequestsError') {
-            console.log("retry with another proxy agent");
+    } catch (err: unknown) {
+        if (typeof err === 'object' && err !== null && 'name' in err) {
+            if ((err as any).name === 'TooManyRequestsError') {
+                console.log("retry with another proxy agent");
+            }
+        } else {
+            console.log(err);
         }
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
@@ -62,7 +62,6 @@ app.post('/guessLanguage', async (req, res) => {
 
     try {
         const data = detect(textData);
-        console.log(data);
         const supportedLang = data?.find(value =>
             value.lang === 'en' || value.lang === 'es' || value.lang === 'pt'
         );
@@ -74,8 +73,26 @@ app.post('/guessLanguage', async (req, res) => {
         }   
     } catch (err) {
         console.log(err);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+app.post('/train', async (req, res) => {
+    const textData = req.body.text;
+
+    try {
+        await saveData({
+            "intent": "train",
+            "utterances": [textData],
+            "answers": [""]
+        });
+
+        return res.status(200).end()
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
 
 
 app.listen(PORT, "localhost", () => {
