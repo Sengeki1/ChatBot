@@ -31,9 +31,10 @@ This creates an improvised `Retrieval-Augmented Generation (RAG)` setup — grou
 
 1. **Clone the repository:**
 
-   ```bash
+  ```bash
     git clone https://github.com/Sengeki1/ChatBot.git
-   cd ChatBot
+    cd ChatBot
+  ```
 
 2. **Install Dependencies**
 
