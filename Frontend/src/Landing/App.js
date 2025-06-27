@@ -31,17 +31,7 @@ async function nlp () {
   await nlp_.train();
 };
 
-async function trainNlp (intent, utterances, answers) {
-  enCorpus.data.push(
-    {
-      "intent": intent,
-      "utterances": utterances,
-      "answers": answers,
-    }
-  )
-
-  nlp()
-}
+nlp()
 
 function App() {
   const [inputValue, setInputValue] = useState('');
