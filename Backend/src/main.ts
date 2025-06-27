@@ -3,7 +3,6 @@ import cors from 'cors';
 import fetch from 'node-fetch';
 import { detect } from 'langdetect';
 import * as env from 'dotenv';
-import { saveData } from './data'
 
 env.config();
 
@@ -76,23 +75,6 @@ app.post('/guessLanguage', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-app.post('/train', async (req, res) => {
-    const textData = req.body.text;
-
-    try {
-        await saveData({
-            "intent": "train",
-            "utterances": [textData],
-            "answers": [""]
-        });
-
-        return res.status(200).end()
-    } catch (err) {
-        console.log(err)
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-})
 
 
 app.listen(PORT, "localhost", () => {

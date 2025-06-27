@@ -87,20 +87,6 @@ function App() {
     })
   }
 
-  async function train(message) {
-    await fetch("http://localhost:3003/train", {
-      method: "POST",
-      headers: {
-        'Content-Type': "application/json"
-      },
-      body: JSON.stringify(
-        {
-          text: message,
-        }
-      )
-    }) 
-  }
-
   async function translateEN(message, locale) {
     return new Promise(async (resolve, reject) => {
       await fetch("http://localhost:3003/translateEN", {
@@ -112,6 +98,30 @@ function App() {
           {
             text: message,
             locale: locale
+          }
+        )
+      }) 
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.text);
+        resolve(data.text);
+      })
+      .catch(err => {
+        reject(err);
+      })
+    })
+  }
+
+  async function predict(message) {
+    return new Promise(async (resolve, reject) => {
+      await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        headers: {
+          'Content-Type': "application/json"
+        },
+        body: JSON.stringify(
+          {
+            utterance: message
           }
         )
       }) 
@@ -172,13 +182,13 @@ function App() {
         if (locale !== "en") {
           setTypingIndicator(true);
           const translation = await translateEN(inputValue, locale);
-          await train(translation)
           const response = await nlp_.process(translation)
           answer = await translate(response.answer, locale);
+          if (answer == null) answer = await predict(inputValue)
         } else {
-          await train(inputValue)
           answer = await nlp_.process(inputValue);
           answer = answer.answer;
+          if (answer == null) answer = await predict(inputValue)
           setTypingIndicator(true);
           await sleep(2000);
         }
